@@ -1,0 +1,102 @@
+<html>
+<head>
+    <title>Chat Room</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <style type="text/css">
+
+        * {margin:0; padding: 0; list-style: none; font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', 'Verdana', sans-serif}
+
+        .contaner {width: 90%; margin: auto}
+
+        header {
+            height: 50px;
+            background: rgba(89, 89, 89, 0.56);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 20px;
+        }
+        #username {
+            color: #3a3d7f;
+            padding: 0 20px;
+        }
+        #messages {
+            display: flex;
+            flex-wrap: wrap;
+            width: 400px;
+        }
+        .msg {
+            background: rgba(238, 169, 230, 0.21);
+            flex-basis: 100%;
+            margin: 2px 2px 0;
+            padding: 5px;
+            border: 2px solid rgba(45, 43, 49, 0.38);
+            border-radius: 5px;
+        }
+        .author {
+            color: rgba(108, 60, 100, 0.84);
+            font-size: small;
+            font-weight: bold;
+        }
+        .text {
+            font-weight: bolder;
+            padding-left: 20px;
+        }
+
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	var socket = io.connect('http://127.0.0.1:5000');
+
+	socket.on('connect', function() {
+	    {#socket.send('User has connected!');#}
+	});
+
+	socket.on('message', function(msg) {
+		$("#messages").append('<li class="msg">'+msg+'</li>');
+		console.log('Received message');
+	});
+
+	$('#sendbutton').on('click', function(e) {
+	    var msg = '<p class="author">' + $('#username').text() + ':</p><p class="text">' + $('#myMessage').val() + '</p>';
+		socket.send(msg);
+		$('#myMessage').val('');
+		e.preventDefault();
+	});
+
+});
+</script>
+<div class="contaner">
+    <header>
+    {% if session['user'] %}
+        <h3 id="username">{{  session['user'] }}</h3>
+        <form action="/logout" method="post">
+            <input type="submit" value="LogOut">
+        </form>
+    {% else %}
+        <form action="/login" method="post">
+            <input type="text" name="username" id="username" placeholder="username">
+{#            <input type="password" name="password" id="password" placeholder="password">#}
+            <input type="submit" name="logbut" id="logbut" value="LogIn">
+        </form>
+    {% endif %}
+    </header>
+
+    <div class="content">
+
+    {% if session['user'] %}
+        <form action="">
+            <input type="text" id="myMessage" placeholder="Input your message here">
+            <input type="submit" id="sendbutton" value="Send message">
+        </form>
+    {% endif %}
+
+        <ul id="messages"></ul>
+    </div>
+</div>
+</body>
+</html>
